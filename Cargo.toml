@@ -1,0 +1,20 @@
+[package]
+name = "moodriver"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+extensions = { git = "https://github.com/Moosync/Moosync" }
+types = { git = "https://github.com/Moosync/Moosync", default-features = false, features = ["extensions-core"] }
+tokio = { version = "1.43.0", features = ["full"] }
+clap = { version = "4.5.4", features = ["derive"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+serde = "1.0.219"
+serde_json = "1.0.140"
+json_comments = "0.2.2"
+indicatif = "0.17.11"
+lazy_static = "1.5.0"
+colored = "2.0"
+walkdir = "2.5.0"
+serde_yaml = "0.9.34"

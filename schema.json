@@ -1,0 +1,2040 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/testcase.schema.json",
+  "title": "Moosync Extension traces",
+  "type": "object",
+
+  "properties": {
+    "commands": {
+      "type": "array",
+      "items": {
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "requestedPlaylists": "#/$defs/ExtensionExtraEvent/requestedPlaylists",
+            "requestedPlaylistSongs": "#/$defs/ExtensionExtraEvent/requestedPlaylistSongs",
+            "oauthCallback": "#/$defs/ExtensionExtraEvent/oauthCallback",
+            "songQueueChanged": "#/$defs/ExtensionExtraEvent/songQueueChanged",
+            "seeked": "#/$defs/ExtensionExtraEvent/seeked",
+            "volumeChanged": "#/$defs/ExtensionExtraEvent/volumeChanged",
+            "playerStateChanged": "#/$defs/ExtensionExtraEvent/playerStateChanged",
+            "songChanged": "#/$defs/ExtensionExtraEvent/songChanged",
+            "preferenceChanged": "#/$defs/ExtensionExtraEvent/preferenceChanged",
+            "playbackDetailsRequested": "#/$defs/ExtensionExtraEvent/playbackDetailsRequested",
+            "customRequest": "#/$defs/ExtensionExtraEvent/customRequest",
+            "requestedSongFromURL": "#/$defs/ExtensionExtraEvent/requestedSongFromURL",
+            "requestedPlaylistFromURL": "#/$defs/ExtensionExtraEvent/requestedPlaylistFromURL",
+            "requestedSearchResult": "#/$defs/ExtensionExtraEvent/requestedSearchResult",
+            "requestedRecommendations": "#/$defs/ExtensionExtraEvent/requestedRecommendations",
+            "requestedLyrics": "#/$defs/ExtensionExtraEvent/requestedLyrics",
+            "requestedArtistSongs": "#/$defs/ExtensionExtraEvent/requestedArtistSongs",
+            "requestedAlbumSongs": "#/$defs/ExtensionExtraEvent/requestedAlbumSongs",
+            "songAdded": "#/$defs/ExtensionExtraEvent/songAdded",
+            "songRemoved": "#/$defs/ExtensionExtraEvent/songRemoved",
+            "playlistAdded": "#/$defs/ExtensionExtraEvent/playlistAdded",
+            "playlistRemoved": "#/$defs/ExtensionExtraEvent/playlistRemoved",
+            "requestedSongFromId": "#/$defs/ExtensionExtraEvent/requestedSongFromId",
+            "getRemoteURL": "#/$defs/ExtensionExtraEvent/getRemoteURL",
+            "scrobble": "#/$defs/ExtensionExtraEvent/scrobble",
+            "requestedSongContextMenu": "#/$defs/ExtensionExtraEvent/requestedSongContextMenu",
+            "requestedPlaylistContextMenu": "#/$defs/ExtensionExtraEvent/requestedPlaylistContextMenu",
+            "contextMenuAction": "#/$defs/ExtensionExtraEvent/contextMenuAction",
+            "getProviderScopes": "#/$defs/ExtensionCommand/getProviderScopes",
+            "getAccounts": "#/$defs/ExtensionCommand/getAccounts",
+            "performAccountLogin": "#/$defs/ExtensionCommand/performAccountLogin"
+          }
+        },
+        "oneOf": [
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedPlaylists" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedPlaylistSongs" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/oauthCallback" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/songQueueChanged" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/seeked" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/volumeChanged" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/playerStateChanged" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/songChanged" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/preferenceChanged" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/playbackDetailsRequested" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/customRequest" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedSongFromURL" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedPlaylistFromURL" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedSearchResult" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedRecommendations" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedLyrics" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedArtistSongs" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedAlbumSongs" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/songAdded" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/songRemoved" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/playlistAdded" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/playlistRemoved" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedSongFromId" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/getRemoteURL" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/scrobble" },
+          { "$ref": "#/$defs/ExtensionExtraEvent/requestedSongContextMenu" },
+          {
+            "$ref": "#/$defs/ExtensionExtraEvent/requestedPlaylistContextMenu"
+          },
+          { "$ref": "#/$defs/ExtensionExtraEvent/contextMenuAction" },
+          { "$ref": "#/$defs/ExtensionCommand/getProviderScopes" },
+          { "$ref": "#/$defs/ExtensionCommand/getAccounts" },
+          { "$ref": "#/$defs/ExtensionCommand/performAccountLogin" }
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedPlaylists" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "boolean" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylists"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedPlaylistSongs" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "prefixItems": [
+                    { "type": "string" },
+                    { "type": "boolean" },
+                    { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylistSongs"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "oauthCallback" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "string" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/oauthCallback"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "songQueueChanged" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{}],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/songQueueChanged"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "seeked" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "integer" }],
+                  "items": false
+                },
+                "expected": {
+                  "$ref": "#/$defs/ExtensionExtraEventResponse/seeked"
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "volumeChanged" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "number" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/volumeChanged"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "playerStateChanged" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "$ref": "#/$defs/PlayerState" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/playerStateChanged"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "songChanged" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [
+                    {
+                      "oneOf": [{ "$ref": "#/$defs/Song" }, { "type": "null" }]
+                    }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/songChanged"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "preferenceChanged" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "$ref": "#/$defs/PreferenceArgs" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/preferenceChanged"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "playbackDetailsRequested" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "$ref": "#/$defs/Song" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/playbackDetailsRequested"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "customRequest" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "string" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/customRequest"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedSongFromURL" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "prefixItems": [{ "type": "string" }, { "type": "boolean" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSongFromURL"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedPlaylistFromURL" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "prefixItems": [{ "type": "string" }, { "type": "boolean" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylistFromURL"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedSearchResult" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "string" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSearchResult"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedRecommendations" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedRecommendations"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "requestedLyrics" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "$ref": "#/$defs/Song" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedLyrics"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedArtistSongs" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "prefixItems": [
+                    { "$ref": "#/$defs/QueryableArtist" },
+                    { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedArtistSongs"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedAlbumSongs" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "prefixItems": [
+                    { "$ref": "#/$defs/QueryableAlbum" },
+                    { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedAlbumSongs"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "songAdded" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [
+                    {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/Song" }
+                    }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    { "$ref": "#/$defs/ExtensionExtraEventResponse/songAdded" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "songRemoved" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [
+                    {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/Song" }
+                    }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/songRemoved"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "playlistAdded" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [
+                    {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/QueryablePlaylist" }
+                    }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/playlistAdded"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "playlistRemoved" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [
+                    {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/QueryablePlaylist" }
+                    }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/playlistRemoved"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedSongFromId" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "string" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSongFromId"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "getRemoteURL" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "$ref": "#/$defs/Song" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/getRemoteURL"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "scrobble" } } },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "$ref": "#/$defs/Song" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    { "$ref": "#/$defs/ExtensionExtraEventResponse/scrobble" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "requestedSongContextMenu" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [
+                    {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/Song" }
+                    }
+                  ],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSongContextMenu"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "requestedPlaylistContextMenu" }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "$ref": "#/$defs/QueryablePlaylist" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylistContextMenu"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "contextMenuAction" } }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{ "type": "string" }],
+                  "items": false
+                },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionExtraEventResponse/contextMenuAction"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "getProviderScopes" } }
+            },
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/PackageNameArgs" },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionCommandResponse/getProviderScopes"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "getAccounts" } } },
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/PackageNameArgs" },
+                "expected": {
+                  "oneOf": [
+                    { "$ref": "#/$defs/ExtensionCommandResponse/getAccounts" },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "performAccountLogin" } }
+            },
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/AccountLoginArgs" },
+                "expected": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ExtensionCommandResponse/performAccountLogin"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          { "$ref": "#/$defs/MainCommandParsable/getSong" },
+          { "$ref": "#/$defs/MainCommandParsable/getEntity" },
+          { "$ref": "#/$defs/MainCommandParsable/getCurrentSong" },
+          { "$ref": "#/$defs/MainCommandParsable/getPlayerState" },
+          { "$ref": "#/$defs/MainCommandParsable/getVolume" },
+          { "$ref": "#/$defs/MainCommandParsable/getTime" },
+          { "$ref": "#/$defs/MainCommandParsable/getQueue" },
+          { "$ref": "#/$defs/MainCommandParsable/getPreference" },
+          { "$ref": "#/$defs/MainCommandParsable/setPreference" },
+          { "$ref": "#/$defs/MainCommandParsable/getSecure" },
+          { "$ref": "#/$defs/MainCommandParsable/setSecure" },
+          { "$ref": "#/$defs/MainCommandParsable/addSongs" },
+          { "$ref": "#/$defs/MainCommandParsable/removeSong" },
+          { "$ref": "#/$defs/MainCommandParsable/updateSong" },
+          { "$ref": "#/$defs/MainCommandParsable/addPlaylist" },
+          { "$ref": "#/$defs/MainCommandParsable/addToPlaylist" },
+          { "$ref": "#/$defs/MainCommandParsable/registerOAuth" },
+          { "$ref": "#/$defs/MainCommandParsable/openExternalUrl" },
+          { "$ref": "#/$defs/MainCommandParsable/updateAccounts" },
+          { "$ref": "#/$defs/MainCommandParsable/extensionsUpdated" }
+        ]
+      }
+    }
+  },
+
+  "required": ["commands", "requests"],
+
+  "$defs": {
+    "ExtensionExtraEvent": {
+      "requestedPlaylists": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedPlaylists" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "boolean" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylists"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedPlaylistSongs": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedPlaylistSongs" },
+          "data": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "prefixItems": [
+              { "type": "string" },
+              { "type": "boolean" },
+              { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylistSongs"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "oauthCallback": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "oauthCallback" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "string" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/oauthCallback" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "songQueueChanged": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "songQueueChanged" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{}],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/songQueueChanged"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "seeked": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "seeked" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "integer" }],
+            "items": false
+          },
+          "expected": {
+            "$ref": "#/$defs/ExtensionExtraEventResponse/seeked"
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "volumeChanged": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "volumeChanged" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "number" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/volumeChanged" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "playerStateChanged": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "playerStateChanged" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "$ref": "#/$defs/PlayerState" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/playerStateChanged"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "songChanged": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "songChanged" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              { "oneOf": [{ "$ref": "#/$defs/Song" }, { "type": "null" }] }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/songChanged" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "preferenceChanged": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "preferenceChanged" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "$ref": "#/$defs/PreferenceArgs" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/preferenceChanged"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "playbackDetailsRequested": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "playbackDetailsRequested" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "$ref": "#/$defs/Song" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/playbackDetailsRequested"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "customRequest": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "customRequest" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "string" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/customRequest" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedSongFromURL": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedSongFromURL" },
+          "data": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [{ "type": "string" }, { "type": "boolean" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSongFromURL"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedPlaylistFromURL": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedPlaylistFromURL" },
+          "data": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [{ "type": "string" }, { "type": "boolean" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylistFromURL"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedSearchResult": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedSearchResult" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "string" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSearchResult"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedRecommendations": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedRecommendations" },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedRecommendations"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type"],
+        "additionalProperties": false
+      },
+      "requestedLyrics": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedLyrics" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "$ref": "#/$defs/Song" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/requestedLyrics" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedArtistSongs": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedArtistSongs" },
+          "data": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [
+              { "$ref": "#/$defs/QueryableArtist" },
+              { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedArtistSongs"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedAlbumSongs": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedAlbumSongs" },
+          "data": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [
+              { "$ref": "#/$defs/QueryableAlbum" },
+              { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedAlbumSongs"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "songAdded": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "songAdded" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Song" }
+              }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/songAdded" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "songRemoved": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "songRemoved" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Song" }
+              }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/songRemoved" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "playlistAdded": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "playlistAdded" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {
+                "type": "array",
+                "items": { "$ref": "#/$defs/QueryablePlaylist" }
+              }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/playlistAdded" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "playlistRemoved": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "playlistRemoved" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {
+                "type": "array",
+                "items": { "$ref": "#/$defs/QueryablePlaylist" }
+              }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/playlistRemoved" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedSongFromId": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedSongFromId" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "string" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSongFromId"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getRemoteURL": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "getRemoteURL" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "$ref": "#/$defs/Song" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/getRemoteURL" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "scrobble": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "scrobble" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "$ref": "#/$defs/Song" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionExtraEventResponse/scrobble" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedSongContextMenu": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedSongContextMenu" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Song" }
+              }
+            ],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedSongContextMenu"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "requestedPlaylistContextMenu": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "requestedPlaylistContextMenu" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "$ref": "#/$defs/QueryablePlaylist" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylistContextMenu"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "contextMenuAction": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "contextMenuAction" },
+          "data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [{ "type": "string" }],
+            "items": false
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionExtraEventResponse/contextMenuAction"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      }
+    },
+    "ExtensionCommand": {
+      "getProviderScopes": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "getProviderScopes" },
+          "data": { "$ref": "#/$defs/PackageNameArgs" },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionCommandResponse/getProviderScopes" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getAccounts": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "getAccounts" },
+          "data": { "$ref": "#/$defs/PackageNameArgs" },
+          "expected": {
+            "oneOf": [
+              { "$ref": "#/$defs/ExtensionCommandResponse/getAccounts" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "performAccountLogin": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "performAccountLogin" },
+          "data": { "$ref": "#/$defs/AccountLoginArgs" },
+          "expected": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExtensionCommandResponse/performAccountLogin"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      }
+    },
+    "PackageNameArgs": {
+      "type": "object",
+      "properties": {
+        "packageName": { "type": "string" }
+      },
+      "required": ["packageName"],
+      "additionalProperties": false
+    },
+    "AccountLoginArgs": {
+      "type": "object",
+      "properties": {
+        "packageName": { "type": "string" },
+        "accountId": { "type": "string" },
+        "loginStatus": { "type": "boolean" },
+        "expected": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ExtensionExtraEventResponse/requestedPlaylists"
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["packageName", "accountId", "loginStatus"],
+      "additionalProperties": false
+    },
+    "ExtensionExtraEventArgs": {
+      "type": "object",
+      "description": "Placeholder – define properties as needed.",
+      "additionalProperties": true
+    },
+    "PlayerState": {
+      "type": "string",
+      "enum": ["PLAYING", "PAUSED", "STOPPED", "LOADING"]
+    },
+    "Song": {
+      "type": "object",
+      "properties": {
+        "_id": { "type": "string" },
+        "path": { "type": ["string", "null"] },
+        "size": { "type": ["number", "null"] },
+        "inode": { "type": ["string", "null"] },
+        "deviceno": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] },
+        "date": { "type": ["string", "null"] },
+        "year": { "type": ["string", "null"] },
+        "lyrics": { "type": ["string", "null"] },
+        "releaseType": { "type": ["string", "null"] },
+        "bitrate": { "type": ["number", "null"] },
+        "codec": { "type": ["string", "null"] },
+        "container": { "type": ["string", "null"] },
+        "duration": { "type": ["number", "null"] },
+        "sampleRate": { "type": ["number", "null"] },
+        "hash": { "type": ["string", "null"] },
+        "type": {
+          "type": "string",
+          "enum": ["URL", "LOCAL", "SPOTIFY", "YOUTUBE"]
+        },
+        "url": { "type": ["string", "null"] },
+        "song_coverPath_high": { "type": ["string", "null"] },
+        "playbackUrl": { "type": ["string", "null"] },
+        "song_coverPath_low": { "type": ["string", "null"] },
+        "date_added": { "type": ["integer", "null"] },
+        "provider_extension": { "type": ["string", "null"] },
+        "icon": { "type": ["string", "null"] },
+        "show_in_library": { "type": ["boolean", "null"] },
+        "track_no": { "type": ["number", "null"] },
+        "library_item": { "type": ["boolean", "null"] }
+      },
+      "required": ["type", "_id"],
+      "additionalProperties": true
+    },
+    "QueryableAlbum": {
+      "type": "object",
+      "properties": {
+        "album_id": { "type": "string" },
+        "album_name": { "type": ["string", "null"] },
+        "album_artist": { "type": ["string", "null"] },
+        "album_coverPath_high": { "type": ["string", "null"] },
+        "album_song_count": { "type": "number" },
+        "year": { "type": ["string", "null"] },
+        "album_coverPath_low": { "type": ["string", "null"] },
+        "album_extra_info": { "$ref": "#/$defs/EntityInfo" }
+      },
+      "required": ["album_song_count", "album_id"],
+      "additionalProperties": true
+    },
+    "QueryableArtist": {
+      "type": "object",
+      "properties": {
+        "artist_id": { "type": "string" },
+        "artist_mbid": { "type": ["string", "null"] },
+        "artist_name": { "type": ["string", "null"] },
+        "artist_coverPath": { "type": ["string", "null"] },
+        "artist_song_count": { "type": "number" },
+        "artist_extra_info": { "$ref": "#/$defs/EntityInfo" },
+        "sanitized_artist_name": { "type": ["string", "null"] }
+      },
+      "required": ["artist_song_count", "artist_id"],
+      "additionalProperties": true
+    },
+    "QueryableGenre": {
+      "type": "object",
+      "properties": {
+        "genre_id": { "type": "string" },
+        "genre_name": { "type": ["string", "null"] },
+        "genre_song_count": { "type": "number" }
+      },
+      "required": ["genre_song_count", "genre_id"],
+      "additionalProperties": true
+    },
+    "ExtensionCommandResponse": {
+      "getProviderScopes": {
+        "type": "array",
+        "items": { "$ref": "#/$defs/ExtensionProviderScope" }
+      },
+      "getAccounts": {
+        "type": "array",
+        "items": { "$ref": "#/$defs/ExtensionAccountDetail" }
+      },
+      "performAccountLogin": { "type": "string" },
+      "Empty": { "type": "null" }
+    },
+    "ExtensionExtraEventResponse": {
+      "requestedPlaylists": { "$ref": "#/$defs/PlaylistReturnType" },
+      "requestedPlaylistSongs": {
+        "$ref": "#/$defs/SongsWithPageTokenReturnType"
+      },
+      "oauthCallback": { "type": "null" },
+      "songQueueChanged": { "type": "null" },
+      "seeked": { "type": "null" },
+      "volumeChanged": { "type": "null" },
+      "playerStateChanged": { "type": "null" },
+      "songChanged": { "type": "null" },
+      "preferenceChanged": { "type": "null" },
+      "playbackDetailsRequested": {
+        "$ref": "#/$defs/PlaybackDetailsReturnType"
+      },
+      "customRequest": { "$ref": "#/$defs/CustomRequestReturnType" },
+      "requestedSongFromURL": { "$ref": "#/$defs/SongReturnType" },
+      "requestedPlaylistFromURL": {
+        "$ref": "#/$defs/PlaylistAndSongsReturnType"
+      },
+      "requestedSearchResult": { "$ref": "#/$defs/SearchReturnType" },
+      "requestedRecommendations": {
+        "$ref": "#/$defs/RecommendationsReturnType"
+      },
+      "requestedLyrics": { "type": "string" },
+      "requestedArtistSongs": {
+        "$ref": "#/$defs/SongsWithPageTokenReturnType"
+      },
+      "requestedAlbumSongs": { "$ref": "#/$defs/SongsWithPageTokenReturnType" },
+      "songAdded": { "type": "null" },
+      "songRemoved": { "type": "null" },
+      "playlistAdded": { "type": "null" },
+      "playlistRemoved": { "type": "null" },
+      "requestedSongFromId": { "$ref": "#/$defs/SongReturnType" },
+      "getRemoteURL": { "type": "string" },
+      "scrobble": { "type": "null" },
+      "requestedSongContextMenu": { "$ref": "#/$defs/ContextMenuReturnType" },
+      "requestedPlaylistContextMenu": {
+        "$ref": "#/$defs/ContextMenuReturnType"
+      },
+      "contextMenuAction": { "type": "null" }
+    },
+    "PlaylistReturnType": {
+      "type": "object",
+      "properties": {
+        "playlists": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/QueryablePlaylist" }
+        }
+      },
+      "required": ["playlists"]
+    },
+    "SongsWithPageTokenReturnType": {
+      "type": "object",
+      "properties": {
+        "songs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Song" }
+        },
+        "next_page_token": {}
+      },
+      "required": ["songs"]
+    },
+    "PlaybackDetailsReturnType": {
+      "type": "object",
+      "properties": {
+        "duration": { "type": "integer", "minimum": 0 },
+        "url": { "type": "string" }
+      },
+      "required": ["duration", "url"]
+    },
+    "CustomRequestReturnType": {
+      "type": "object",
+      "properties": {
+        "mimeType": { "type": ["string", "null"] },
+        "data": { "type": ["array", "null"], "items": { "type": "integer" } },
+        "redirectUrl": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "SongReturnType": {
+      "type": "object",
+      "properties": {
+        "song": { "$ref": "#/$defs/Song" }
+      },
+      "required": ["song"]
+    },
+    "PlaylistAndSongsReturnType": {
+      "type": "object",
+      "properties": {
+        "playlist": { "$ref": "#/$defs/QueryablePlaylist" },
+        "songs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Song" }
+        }
+      },
+      "required": ["playlist"]
+    },
+    "SearchReturnType": {
+      "type": "object",
+      "properties": {
+        "songs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Song" }
+        },
+        "playlists": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/QueryablePlaylist" }
+        },
+        "artists": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/QueryableArtist" }
+        },
+        "albums": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/QueryableAlbum" }
+        }
+      },
+      "required": ["songs", "playlists", "artists", "albums"]
+    },
+    "RecommendationsReturnType": {
+      "type": "object",
+      "properties": {
+        "songs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Song" }
+        }
+      },
+      "required": ["songs"]
+    },
+    "ExtensionProviderScope": {
+      "type": "string",
+      "enum": [
+        "search",
+        "playlists",
+        "playlistSongs",
+        "artistSongs",
+        "albumSongs",
+        "recommendations",
+        "scrobbles",
+        "playlistFromUrl",
+        "songFromUrl",
+        "searchAlbum",
+        "searchArtist",
+        "playbackDetails",
+        "lyrics",
+        "songContextMenu",
+        "playlistContextMenu",
+        "accounts"
+      ]
+    },
+    "ExtensionAccountDetail": {
+      "type": "object"
+    },
+    "QueryablePlaylist": {
+      "type": "object"
+    },
+    "PreferenceArgs": {
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "value": {}
+      },
+      "required": ["key", "value"],
+      "additionalProperties": true
+    },
+    "ContextMenuReturnType": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "icon": { "type": "string" },
+        "action_id": { "type": "string" }
+      },
+      "required": ["name", "icon", "action_id"]
+    },
+    "EntityInfo": {
+      "type": "object",
+      "description": "Placeholder – define properties as needed.",
+      "additionalProperties": true
+    },
+    "MainCommandParsable": {
+      "getSong": {
+        "$anchor": "getSong",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getSong" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/Song" }
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getEntity": {
+        "$anchor": "getEntity",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getEntity" },
+          "data": {}
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getCurrentSong": {
+        "$anchor": "getCurrentSong",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getCurrentSong" },
+          "data": { "oneOf": [{ "$ref": "#/$defs/Song" }, { "type": "null" }] }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getPlayerState": {
+        "$anchor": "getPlayerState",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getPlayerState" },
+          "data": { "$ref": "#/$defs/PlayerState" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getVolume": {
+        "$anchor": "getVolume",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getVolume" },
+          "data": { "type": "number" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getTime": {
+        "$anchor": "getTime",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getTime" },
+          "data": { "type": "number" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getQueue": {
+        "$anchor": "getQueue",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getQueue" },
+          "data": {}
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getPreference": {
+        "$anchor": "getPreference",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getPreference" },
+          "data": { "$ref": "#/$defs/PreferenceArgs" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "setPreference": {
+        "$anchor": "setPreference",
+        "type": "object",
+        "properties": {
+          "type": { "const": "setPreference" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "getSecure": {
+        "$anchor": "getSecure",
+        "type": "object",
+        "properties": {
+          "type": { "const": "getSecure" },
+          "data": { "$ref": "#/$defs/PreferenceArgs" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "setSecure": {
+        "$anchor": "setSecure",
+        "type": "object",
+        "properties": {
+          "type": { "const": "setSecure" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "addSongs": {
+        "$anchor": "addSongs",
+        "type": "object",
+        "properties": {
+          "type": { "const": "addSongs" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/Song" }
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "removeSong": {
+        "$anchor": "removeSong",
+        "type": "object",
+        "properties": {
+          "type": { "const": "removeSong" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "updateSong": {
+        "$anchor": "updateSong",
+        "type": "object",
+        "properties": {
+          "type": { "const": "updateSong" },
+          "data": { "$ref": "#/$defs/Song" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "addPlaylist": {
+        "$anchor": "addPlaylist",
+        "type": "object",
+        "properties": {
+          "type": { "const": "addPlaylist" },
+          "data": { "type": "string" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "addToPlaylist": {
+        "$anchor": "addToPlaylist",
+        "type": "object",
+        "properties": {
+          "type": { "const": "addToPlaylist" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "registerOAuth": {
+        "$anchor": "registerOAuth",
+        "type": "object",
+        "properties": {
+          "type": { "const": "registerOAuth" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "openExternalUrl": {
+        "$anchor": "openExternalUrl",
+        "type": "object",
+        "properties": {
+          "type": { "const": "openExternalUrl" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "updateAccounts": {
+        "$anchor": "updateAccounts",
+        "type": "object",
+        "properties": {
+          "type": { "const": "updateAccounts" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      },
+      "extensionsUpdated": {
+        "$anchor": "extensionsUpdated",
+        "type": "object",
+        "properties": {
+          "type": { "const": "extensionsUpdated" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      }
+    }
+  }
+}
