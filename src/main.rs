@@ -1,5 +1,4 @@
 use std::{
-    env::args,
     fs::File,
     io::BufReader,
     path::{Path, PathBuf},
@@ -18,7 +17,7 @@ use tracing::{create_log_buffer, create_verbose_log, flush_logs};
 use types::{
     errors::{MoosyncError, Result},
     extensions::{
-        ExtensionCommand, ExtensionCommandResponse, ExtensionExtraEventResponse,
+        ExtensionCommand,
         GenericExtensionHostRequest, MainCommand, MainCommandResponse,
     },
     songs::Song,
@@ -59,17 +58,10 @@ pub(crate) enum ValidCommand {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-#[serde(untagged)]
-pub(crate) enum ValidResponse {
-    ExtensionExtraEventResponse(ExtensionExtraEventResponse),
-    ExtensionCommandResponse(ExtensionCommandResponse),
-}
-
-#[derive(Deserialize, Debug, Clone)]
 pub(crate) struct CommandWrapper {
     #[serde(flatten)]
     command: ValidCommand,
-    expected: Option<ValidResponse>,
+    expected: Option<Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -373,24 +365,12 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
         };
 
         if let Some(expected) = command.expected {
-            if let ValidResponse::ExtensionCommandResponse(expected_resp) = expected {
-                if expected_resp != resp {
+            if !expected.is_string() || expected.as_str().unwrap() != "ignore" {
+                let resp_value = serde_json::to_value(resp)?;
+                if resp_value != expected {
                     return Err(
-                        format!("Expected: {:?}, received: {:?}", expected_resp, resp).into(),
+                        format!("Expected: {:?}, received: {:?}", expected, resp_value).into(),
                     );
-                }
-            } else if let ValidResponse::ExtensionExtraEventResponse(expected_resp) = expected {
-                if ExtensionCommandResponse::ExtraExtensionEvent(Box::new(expected_resp.clone()))
-                    != resp
-                {
-                    return Err(format!(
-                        "Expected: {:?}, received: {:?}",
-                        ExtensionCommandResponse::ExtraExtensionEvent(Box::new(
-                            expected_resp.clone()
-                        )),
-                        resp
-                    )
-                    .into());
                 }
             }
         } else if !serde_json::to_value(&resp).unwrap().is_null() {
