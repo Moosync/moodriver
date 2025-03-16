@@ -3,6 +3,10 @@ use std::sync::{Arc, Mutex};
 use tracing_subscriber::fmt::MakeWriter;
 use tracing_subscriber::{self, EnvFilter};
 
+lazy_static::lazy_static! {
+    static ref LOG_BUFFER: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(Vec::new()));
+}
+
 struct MemoryWriter {
     buffer: Arc<Mutex<Vec<u8>>>,
 }
@@ -28,10 +32,24 @@ impl Write for MemoryWriter {
         Ok(())
     }
 }
-pub(crate) fn create_log_buffer() -> Arc<Mutex<Vec<u8>>> {
-    let log_buffer = Arc::new(Mutex::new(Vec::new()));
+
+pub(crate) fn create_verbose_log(verbosity: u8) {
+    let level = if verbosity == 1 {
+        "extism::pdk=debug"
+    } else {
+        "debug"
+    };
+    let subscriber = tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::new(level))
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("Failed to set global default subscriber");
+}
+
+pub(crate) fn create_log_buffer() {
     let writer = MemoryWriter {
-        buffer: log_buffer.clone(),
+        buffer: LOG_BUFFER.clone(),
     };
 
     let subscriber = tracing_subscriber::fmt()
@@ -41,12 +59,10 @@ pub(crate) fn create_log_buffer() -> Arc<Mutex<Vec<u8>>> {
 
     tracing::subscriber::set_global_default(subscriber)
         .expect("Failed to set global default subscriber");
-
-    log_buffer
 }
 
-pub(crate) fn flush_logs(buffer: Arc<Mutex<Vec<u8>>>) {
-    let mut logs = buffer.lock().unwrap();
+pub(crate) fn flush_logs() {
+    let mut logs = LOG_BUFFER.lock().unwrap();
     println!("{}", String::from_utf8_lossy(&logs));
     logs.clear();
 }

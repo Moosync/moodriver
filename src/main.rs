@@ -1,4 +1,5 @@
 use std::{
+    env::args,
     fs::File,
     io::BufReader,
     path::{Path, PathBuf},
@@ -7,13 +8,13 @@ use std::{
     time::Duration,
 };
 
-use clap::{Parser, arg, command};
+use clap::{ArgAction, Parser, arg, command};
 use colored::*;
 use extensions::{ExtensionHandler, UiReplySender, UiRequestReceiver};
 use json_comments::StripComments;
 use serde::Deserialize;
 use serde_json::Value;
-use tracing::{create_log_buffer, flush_logs};
+use tracing::{create_log_buffer, create_verbose_log, flush_logs};
 use types::{
     errors::{MoosyncError, Result},
     extensions::{
@@ -46,8 +47,8 @@ struct Cli {
     /// Path to the wasm directory
     wasm: PathBuf,
 
-    #[arg(short = 'v', long = "verbose", default_value = "false")]
-    verbose: bool,
+    #[arg(short = 'v', long = "verbose", default_value = "false", action = ArgAction::Count)]
+    verbose: u8,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -311,7 +312,7 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
 
     while handler.get_installed_extensions().await?.is_empty() {
         is_waiting = true;
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(1000));
     }
 
     if is_waiting {
@@ -445,19 +446,18 @@ async fn run_cli(mut args: Cli) -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let buffer = create_log_buffer();
-
     let args = Cli::parse();
 
-    let mut is_err = false;
-    if let Err(e) = run_cli(args.clone()).await {
-        println!("{}", e.to_string().red());
-        is_err = true
+    if args.verbose > 0 {
+        create_verbose_log(args.verbose);
+    } else {
+        create_log_buffer();
     }
 
-    if is_err || args.verbose {
+    if let Err(e) = run_cli(args.clone()).await {
+        println!("{}", e.to_string().red());
         println!("\n=== Extension output ===\n",);
-        flush_logs(buffer);
+        flush_logs();
         println!("\n=== End Extension output ===\n",);
     }
 

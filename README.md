@@ -22,13 +22,21 @@ Arguments:
 Options:
   -t, --trace <TRACE>  Path to the trace file
   -d, --dir <DIR>      Path to the trace directory
-  -v, --verbose
+  -v, --verbose...
   -h, --help           Print help
   -V, --version        Print version
 ```
 
 ```bash
 moodriver -d ./traces/sample_trace.json ./ext.wasm
+```
+
+```bash
+moodriver -v -d ./traces/sample_trace.json ./ext.wasm
+```
+
+```bash
+moodriver -vv -d ./traces/sample_trace.json ./ext.wasm
 ```
 
 ## Writing traces
