@@ -7,12 +7,13 @@ use std::{
     time::Duration,
 };
 
-use clap::{arg, command, Parser};
+use clap::{Parser, arg, command};
 use colored::*;
 use extensions::{ExtensionHandler, UiReplySender, UiRequestReceiver};
 use json_comments::StripComments;
 use serde::Deserialize;
 use serde_json::Value;
+use tracing::{create_log_buffer, flush_logs};
 use types::{
     errors::{MoosyncError, Result},
     extensions::{
@@ -28,9 +29,10 @@ use types::{
 use ui::finish_and_clear;
 use walkdir::WalkDir;
 
+mod tracing;
 mod ui;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
     /// Path to the trace file
@@ -43,24 +45,27 @@ struct Cli {
 
     /// Path to the wasm directory
     wasm: PathBuf,
+
+    #[arg(short = 'v', long = "verbose", default_value = "false")]
+    verbose: bool,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum ValidCommand {
+pub(crate) enum ValidCommand {
     ExtensionExtraEvent(ExtensionExtraEvent),
     ExtensionCommand(ExtensionCommand),
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum ValidResponse {
+pub(crate) enum ValidResponse {
     ExtensionExtraEventResponse(ExtensionExtraEventResponse),
     ExtensionCommandResponse(ExtensionCommandResponse),
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct CommandWrapper {
+pub(crate) struct CommandWrapper {
     #[serde(flatten)]
     command: ValidCommand,
     expected: Option<ValidResponse>,
@@ -68,7 +73,7 @@ pub struct CommandWrapper {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "type", content = "data")]
-pub enum MainCommandParsable {
+pub(crate) enum MainCommandParsable {
     GetSong(Vec<Song>),
     GetEntity(Value),
     GetCurrentSong(Option<Song>),
@@ -368,26 +373,27 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
 
         if let Some(expected) = command.expected {
             if let ValidResponse::ExtensionCommandResponse(expected_resp) = expected {
-                assert_eq!(
-                    expected_resp, resp,
-                    "Expected: {:?}, received: {:?}",
-                    expected_resp, resp
-                );
+                if expected_resp != resp {
+                    return Err(
+                        format!("Expected: {:?}, received: {:?}", expected_resp, resp).into(),
+                    );
+                }
             } else if let ValidResponse::ExtensionExtraEventResponse(expected_resp) = expected {
-                assert_eq!(
-                    resp,
-                    ExtensionCommandResponse::ExtraExtensionEvent(Box::new(expected_resp.clone())),
-                    "Expected: {:?}, received: {:?}",
-                    expected_resp,
-                    resp
-                )
+                if ExtensionCommandResponse::ExtraExtensionEvent(Box::new(expected_resp.clone()))
+                    != resp
+                {
+                    return Err(format!(
+                        "Expected: {:?}, received: {:?}",
+                        ExtensionCommandResponse::ExtraExtensionEvent(Box::new(
+                            expected_resp.clone()
+                        )),
+                        resp
+                    )
+                    .into());
+                }
             }
-        } else {
-            assert!(
-                serde_json::to_value(&resp).unwrap().is_null(),
-                "Expected: null, received: {:?}",
-                resp
-            );
+        } else if !serde_json::to_value(&resp).unwrap().is_null() {
+            return Err(format!("Expected: null, received: {:?}", resp).into());
         }
 
         println!("✓ Successful: {}", command_desc.green());
@@ -403,14 +409,11 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
     Ok(())
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn run_cli(mut args: Cli) -> Result<()> {
     println!(
         "{}",
         "=== Starting test CLI for WASM extensions ===\n".green()
     );
-
-    let mut args = Cli::parse();
 
     if args.dir.is_none() {
         args.dir = Some(PathBuf::from_str("./traces").unwrap())
@@ -433,8 +436,30 @@ async fn main() -> Result<()> {
     }
 
     println!(
-        "\n{}",
+        "\n{}\n",
         "=== All test commands completed successfully ===".green()
     );
+
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let buffer = create_log_buffer();
+
+    let args = Cli::parse();
+
+    let mut is_err = false;
+    if let Err(e) = run_cli(args.clone()).await {
+        println!("{}", e.to_string().red());
+        is_err = true
+    }
+
+    if is_err || args.verbose {
+        println!("\n=== Extension output ===\n",);
+        flush_logs(buffer);
+        println!("\n=== End Extension output ===\n",);
+    }
+
     Ok(())
 }

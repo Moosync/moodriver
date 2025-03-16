@@ -26,4 +26,85 @@ moodriver -d ./traces/sample_trace.json ./ext.wasm
 
 ## Writing traces
 
-TODO
+There are 2 components to a trace file:
+1. **Commands**
+2. **Requests**
+
+### Commands
+Commands are used to simulate user actions as they would happen in Moosync.
+
+For example, you can send a command "seeked" to the extension to simulate an action of seeking a song. The below example of a command means that the song was seeked to position 0.
+The expected property defines what is an appropriate response that should be received by the extension. In this case, the extension should respond with a null since "seeked" events expects no return value.
+```json
+{
+  "type": "seeked",
+  "data": [0],
+  "expected": null
+}
+```
+
+Lets consider another example of the command "getProviderScopes". We want our extension to respond with the scopes "scrobbles" and "accounts". Some commands like this require passing a package name to the command.
+The below trace expects the extension to respond with the scopes "scrobbles" and "accounts" for the command.
+
+```json
+{
+  "type": "getProviderScopes",
+  "data": {
+    "packageName": "moosync.lastfm"
+  },
+  "expected": ["scrobbles", "accounts"]
+}
+```
+
+### Requests
+The requests property can be used to simulate responses to requests sent by the extension. For eg, if the extension makes a call to "getSecure", we can reply back with a mock response.
+The below trace replies back to a getSecure request with a key of "session"
+
+```json
+  {
+    "type": "getSecure",
+    "data": {
+      "key": "session",
+      "value": "test"
+    }
+  }
+```
+
+
+### Sample trace file
+```jsonc
+{
+  "$schema": "https://raw.githubusercontent.com/Moosync/moodriver/refs/heads/main/schema.json",
+  "commands": [
+    {
+      "type": "seeked",
+      "data": [0],
+      "expected": null
+    },
+    {
+      "type": "getProviderScopes",
+      "data": {
+        "packageName": "moosync.lastfm"
+      },
+      "expected": ["scrobbles", "accounts"]
+    }
+  ],
+  "requests": [
+    {
+      "type": "getSecure",
+      "data": {
+        "key": "not_session",
+        "value": "not_test"
+      }
+    },
+    {
+      "type": "getSecure",
+      "data": {
+        "key": "session",
+        "value": "test"
+      }
+    }
+  ]
+}
+
+```
