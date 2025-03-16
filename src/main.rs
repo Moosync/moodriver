@@ -47,7 +47,7 @@ struct Cli {
     /// Path to the wasm directory
     wasm: PathBuf,
 
-    #[arg(short = 'v', long = "verbose", default_value = "false", action = ArgAction::Count)]
+    #[arg(short = 'v', long = "verbose", default_value = "0", action = ArgAction::Count)]
     verbose: u8,
 }
 
