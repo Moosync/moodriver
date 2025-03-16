@@ -1,4 +1,4 @@
-# Moosync WASM Extension Test CLI
+# Moodriver
 
 This CLI tool allows testing of Moosync WASM extensions by:
 1. Loading and initializing extensions
@@ -14,7 +14,7 @@ cargo install --git https://github.com/Moosync/moodriver
 ## Usage
 
 ```
-Usage: extensions-wasm [OPTIONS] <WASM>
+Usage: moodriver [OPTIONS] <WASM>
 
 Arguments:
   <WASM>  Path to the wasm directory
@@ -22,6 +22,7 @@ Arguments:
 Options:
   -t, --trace <TRACE>  Path to the trace file
   -d, --dir <DIR>      Path to the trace directory
+  -v, --verbose
   -h, --help           Print help
   -V, --version        Print version
 ```
