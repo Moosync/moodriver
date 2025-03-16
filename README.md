@@ -78,7 +78,7 @@ The below trace replies back to a getSecure request with a key of "session"
 
 
 ### Sample trace file
-```jsonc
+```json
 {
   "$schema": "https://raw.githubusercontent.com/Moosync/moodriver/refs/heads/main/schema.json",
   "commands": [
