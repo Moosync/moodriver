@@ -5,6 +5,12 @@ This CLI tool allows testing of Moosync WASM extensions by:
 2. Sending commands to extensions
 3. Handling UI requests from extensions
 
+## Installation
+
+```bash
+cargo install --git https://github.com/Moosync/moodriver
+```
+
 ## Usage
 
 ```
@@ -61,13 +67,13 @@ The requests property can be used to simulate responses to requests sent by the 
 The below trace replies back to a getSecure request with a key of "session"
 
 ```json
-  {
-    "type": "getSecure",
-    "data": {
-      "key": "session",
-      "value": "test"
-    }
+{
+  "type": "getSecure",
+  "data": {
+    "key": "session",
+    "value": "test"
   }
+}
 ```
 
 
