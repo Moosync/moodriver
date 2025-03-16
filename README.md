@@ -63,6 +63,8 @@ The below trace expects the extension to respond with the scopes "scrobbles" and
 }
 ```
 
+More commands can be be found at [moosync_edk::ExtensionExtraEvent](https://moosync.app/extensions-sdk/wasm-extension-rs/docs/wasm32-wasip1/doc/moosync_edk/enum.ExtensionExtraEvent.html) and [moosync_edk::ExtensionCommand](https://moosync.app/extensions-sdk/wasm-extension-rs/docs/wasm32-wasip1/doc/moosync_edk/enum.ExtensionCommand.html)
+
 ### Requests
 The requests property can be used to simulate responses to requests sent by the extension. For eg, if the extension makes a call to "getSecure", we can reply back with a mock response.
 The below trace replies back to a getSecure request with a key of "session"
@@ -77,6 +79,7 @@ The below trace replies back to a getSecure request with a key of "session"
 }
 ```
 
+More requests can be found at [moosync_edk::MainCommandResponse](https://moosync.app/extensions-sdk/wasm-extension-rs/docs/wasm32-wasip1/doc/moosync_edk/enum.MainCommandResponse.html)
 
 ### Sample trace file
 ```json
