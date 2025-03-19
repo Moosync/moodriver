@@ -6,6 +6,7 @@ use std::{
     str::FromStr,
     thread,
     time::Duration,
+    process::ExitCode,
 };
 
 use clap::{ArgAction, Parser, arg, command};
@@ -451,7 +452,7 @@ async fn run_cli(mut args: Cli) -> Result<()> {
 }
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> ExitCode {
     let args = Cli::parse();
 
     if args.verbose > 0 {
@@ -464,8 +465,9 @@ async fn main() -> Result<()> {
         println!("\n=== Extension output ===\n",);
         flush_logs();
         println!("\n=== End Extension output ===\n",);
-        Err(e.to_string())
+        println!("{}", e.to_string().red());
+        return ExitCode::FAILURE;
     } else {
-        Ok(())
+        return ExitCode::SUCCESS;
     }
 }
