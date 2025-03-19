@@ -28,15 +28,15 @@ Options:
 ```
 
 ```bash
-moodriver -d ./traces/sample_trace.json ./ext.wasm
+moodriver -t ./traces/sample_trace.json ./ext.wasm
 ```
 
 ```bash
-moodriver -v -d ./traces/sample_trace.json ./ext.wasm
+moodriver -v -t ./traces/sample_trace.json ./ext.wasm
 ```
 
 ```bash
-moodriver -vv -d ./traces/sample_trace.json ./ext.wasm
+moodriver -vv -t ./traces/sample_trace.js ./ext.wasm
 ```
 
 ## Writing traces
