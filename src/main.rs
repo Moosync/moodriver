@@ -435,11 +435,11 @@ async fn main() -> Result<()> {
     }
 
     if let Err(e) = run_cli(args.clone()).await {
-        println!("{}", e.to_string().red());
         println!("\n=== Extension output ===\n",);
         flush_logs();
         println!("\n=== End Extension output ===\n",);
+        Err(e.to_string())
+    } else {
+        Ok(())
     }
-
-    Ok(())
 }
