@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     fs::File,
     io::BufReader,
     path::{Path, PathBuf},
@@ -16,10 +17,7 @@ use serde_json::Value;
 use tracing::{create_log_buffer, create_verbose_log, flush_logs};
 use types::{
     errors::{MoosyncError, Result},
-    extensions::{
-        ExtensionCommand,
-        GenericExtensionHostRequest, MainCommand, MainCommandResponse,
-    },
+    extensions::{ExtensionCommand, GenericExtensionHostRequest, MainCommand, MainCommandResponse},
     songs::Song,
     ui::{
         extensions::{ExtensionExtraEvent, ExtensionExtraEventArgs, PreferenceData},
@@ -282,6 +280,10 @@ fn listen_ui_requests(
     });
 }
 
+fn is_ignore(expected: &Value) -> bool {
+    expected.is_string() && expected.as_str().unwrap() == "ignore"
+}
+
 async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
     let test_case = parse_test_case(file)?;
     println!(
@@ -298,16 +300,36 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
 
     handler.find_new_extensions().await?;
 
-    let mut is_waiting: bool = false;
+    let mut is_waiting: bool = true;
 
     ui::initialize_progress_bar().await;
 
-    while handler.get_installed_extensions().await?.is_empty() {
+    let mut notified: HashMap<String, bool> = HashMap::new();
+    while is_waiting {
         is_waiting = true;
-        thread::sleep(Duration::from_millis(1000));
+        let exts = handler.get_installed_extensions().await?;
+        let mut active = 0;
+        for ext in exts.iter() {
+            if !notified.contains_key(&ext.package_name) {
+                notified.insert(ext.package_name.clone(), true);
+                println!(
+                    "Extension found {}, active: {}",
+                    ext.package_name, ext.active
+                );
+            }
+            if ext.active {
+                active += 1;
+            }
+        }
+
+        if !exts.is_empty() && active == exts.len() {
+            is_waiting = false
+        } else {
+            thread::sleep(Duration::from_millis(1000));
+        }
     }
 
-    if is_waiting {
+    if !is_waiting {
         finish_and_clear().await;
     }
 
@@ -319,7 +341,7 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
         .package_name
         .clone();
 
-    println!("Extension found: {}", package_name.yellow());
+    println!("Extension active: {}", package_name.yellow());
 
     println!("\n------------------------------------------------------------");
     println!(
@@ -365,12 +387,16 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
         };
 
         if let Some(expected) = command.expected {
-            if !expected.is_string() || expected.as_str().unwrap() != "ignore" {
+            if !is_ignore(&expected) {
                 let resp_value = serde_json::to_value(resp)?;
                 if resp_value != expected {
                     return Err(
                         format!("Expected: {:?}, received: {:?}", expected, resp_value).into(),
                     );
+                }
+            } else {
+                if serde_json::to_value(&resp).unwrap().is_null() {
+                    return Err("Expected: non null, received: null".into());
                 }
             }
         } else if !serde_json::to_value(&resp).unwrap().is_null() {
