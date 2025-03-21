@@ -18,7 +18,7 @@ jobs:
             archive: zip
           - target: x86_64-unknown-linux-musl
             archive: tar.gz tar.xz tar.zst
-          - target: aarch64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-musl
             archive: tar.gz tar.xz tar.zst
           - target: x86_64-apple-darwin
             archive: zip
@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          components: rustfmt
+          toolchain: stable,1.85.0
       - name: Compile and release
         uses: rust-build/rust-build.action@v1.4.5
         env:
