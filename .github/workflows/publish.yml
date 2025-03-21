@@ -9,36 +9,67 @@ on:
 jobs:
   release:
     name: release ${{ matrix.target }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - target: x86_64-pc-windows-gnu
+            os: windows-latest
             archive: zip
-          - target: x86_64-unknown-linux-musl
-            archive: tar.gz tar.xz tar.zst
-          - target: aarch64-unknown-linux-musl
-            archive: tar.gz tar.xz tar.zst
+            extension: .exe
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+            archive: zip
+            extension: ""
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04
+            archive: zip
+            extension: ""
           - target: x86_64-apple-darwin
+            os: macos-13
             archive: zip
+            extension: ""
           - target: aarch64-apple-darwin
+            os: macos-latest
             archive: zip
+            extension: ""
 
     steps:
       - uses: actions/checkout@master
-      - name: Compile and release
-        uses: rust-build/rust-build.action@v1.4.5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          RUSTTARGET: ${{ matrix.target }}
-          ARCHIVE_TYPES: ${{ matrix.archive }}
-          TOOLCHAIN_VERSION: 1.85.0
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          toolchain: 1.85.0
+          target: ${{ matrix.target }}
+      - name: Install deps
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get -y install crossbuild-essential-arm64
+      - name: Compile
+        id: compile
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+      - name: Create zip archive (Windows)
+        if: matrix.os == 'windows-latest'
+        id: zip_release_windows
+        shell: powershell
+        run: |
+          mkdir -p release
+          copy target\${{ matrix.target }}\release\moodriver${{ matrix.extension }} release\
+          cd release
+          Compress-Archive -Path moodriver${{ matrix.extension }} -DestinationPath moodriver-${{ matrix.target }}.zip
+          echo "ARCHIVE_PATH=release/moodriver-${{ matrix.target }}.zip" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
+      - name: Create zip archive (Unix)
+        if: matrix.os != 'windows-latest'
+        id: zip_release_unix
+        run: |
+          mkdir -p release
+          cp target/${{ matrix.target }}/release/moodriver${{ matrix.extension }} release/
+          cd release
+          zip -r moodriver-${{ matrix.target }}.zip moodriver${{ matrix.extension }}
+          echo "ARCHIVE_PATH=release/moodriver-${{ matrix.target }}.zip" >> $GITHUB_OUTPUT
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: moosync
-          path: |
-            ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+          files: ${{ steps.zip_release_windows.outputs.ARCHIVE_PATH || steps.zip_release_unix.outputs.ARCHIVE_PATH }}
