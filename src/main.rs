@@ -11,7 +11,6 @@ use std::{
 
 use clap::{ArgAction, Parser, arg, command};
 use colored::*;
-use difference::{Changeset, Difference};
 use extensions::{ExtensionHandler, UiReplySender, UiRequestReceiver};
 use json_comments::StripComments;
 use manifest::validate_manifest;
@@ -47,8 +46,8 @@ struct Cli {
     #[arg(short = 'd', long = "dir", conflicts_with = "trace")]
     dir: Option<PathBuf>,
 
-    /// Path to the wasm directory
-    wasm: PathBuf,
+    /// Path to the extension manifest
+    manifest_path: PathBuf,
 
     #[arg(short = 'v', long = "verbose", default_value = "0", action = ArgAction::Count)]
     verbose: u8,
@@ -435,10 +434,10 @@ async fn run_cli(mut args: Cli) -> Result<()> {
         args.dir = Some(PathBuf::from_str("./traces").unwrap())
     }
 
-    validate_manifest(&args.wasm)?;
+    validate_manifest(&args.manifest_path)?;
 
     if let Some(trace) = args.trace {
-        run_test(&trace, &args.wasm).await?;
+        run_test(&trace, &args.manifest_path).await?;
     } else if let Some(dir) = args.dir {
         assert!(dir.exists(), "Traces directory {:?} does not exist", dir);
 
@@ -446,7 +445,7 @@ async fn run_cli(mut args: Cli) -> Result<()> {
             if entry.file_type().is_file() {
                 if let Some(ext) = entry.path().extension() {
                     if ext == "json" || ext == "jsonc" || ext == "yaml" || ext == "yml" {
-                        run_test(entry.path(), &args.wasm).await?;
+                        run_test(entry.path(), &args.manifest_path).await?;
                     }
                 }
             }
