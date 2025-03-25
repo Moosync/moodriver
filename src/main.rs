@@ -3,16 +3,18 @@ use std::{
     fs::File,
     io::BufReader,
     path::{Path, PathBuf},
+    process::ExitCode,
     str::FromStr,
     thread,
     time::Duration,
-    process::ExitCode,
 };
 
 use clap::{ArgAction, Parser, arg, command};
 use colored::*;
+use difference::{Changeset, Difference};
 use extensions::{ExtensionHandler, UiReplySender, UiRequestReceiver};
 use json_comments::StripComments;
+use manifest::validate_manifest;
 use serde::Deserialize;
 use serde_json::Value;
 use tracing::{create_log_buffer, create_verbose_log, flush_logs};
@@ -26,10 +28,13 @@ use types::{
     },
 };
 use ui::finish_and_clear;
+use utils::{pretty_print_diff, remove_nulls, sanitize_resp_by_expected};
 use walkdir::WalkDir;
 
+mod manifest;
 mod tracing;
 mod ui;
+mod utils;
 
 #[derive(Parser, Debug, Clone)]
 #[command(author, version, about, long_about = None)]
@@ -281,10 +286,6 @@ fn listen_ui_requests(
     });
 }
 
-fn is_ignore(expected: &Value) -> bool {
-    expected.is_string() && expected.as_str().unwrap() == "ignore"
-}
-
 async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
     let test_case = parse_test_case(file)?;
     println!(
@@ -387,21 +388,28 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
             }
         };
 
-        if let Some(expected) = command.expected {
-            if !is_ignore(&expected) {
-                let resp_value = serde_json::to_value(resp)?;
-                if resp_value != expected {
-                    return Err(
-                        format!("Expected: {:?}, received: {:?}", expected, resp_value).into(),
-                    );
-                }
-            } else {
-                if serde_json::to_value(&resp).unwrap().is_null() {
-                    return Err("Expected: non null, received: null".into());
-                }
+        if let Some(mut expected) = command.expected {
+            let mut resp_value = serde_json::to_value(resp)?;
+            sanitize_resp_by_expected(&mut resp_value, &mut expected);
+
+            remove_nulls(&mut expected);
+            remove_nulls(&mut resp_value);
+
+            // if !is_ignore(&expected) {
+            if resp_value != expected {
+                let expected_str = serde_json::to_string_pretty(&expected).unwrap();
+                let received_str = serde_json::to_string_pretty(&resp_value).unwrap();
+
+                return Err(
+                    format!("Diff:\n{}", pretty_print_diff(&expected_str, &received_str)).into(),
+                );
             }
         } else if !serde_json::to_value(&resp).unwrap().is_null() {
-            return Err(format!("Expected: null, received: {:?}", resp).into());
+            return Err(format!(
+                "Expected: null, received: {}",
+                serde_json::to_string_pretty(&resp).unwrap()
+            )
+            .into());
         }
 
         println!("✓ Successful: {}", command_desc.green());
@@ -426,6 +434,8 @@ async fn run_cli(mut args: Cli) -> Result<()> {
     if args.dir.is_none() {
         args.dir = Some(PathBuf::from_str("./traces").unwrap())
     }
+
+    validate_manifest(&args.wasm)?;
 
     if let Some(trace) = args.trace {
         run_test(&trace, &args.wasm).await?;
