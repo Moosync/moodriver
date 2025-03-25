@@ -400,7 +400,7 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
                 let received_str = serde_json::to_string_pretty(&resp_value).unwrap();
 
                 return Err(
-                    format!("Diff:\n{}", pretty_print_diff(&expected_str, &received_str)).into(),
+                    format!("Expected response does not match received response:\n{}\n\n{}", pretty_print_diff(&expected_str, &received_str), "Legend: \n\"+\" - Present in expected but not in received\n\"-\" - Present in received but not in expected".cyan()).into(),
                 );
             }
         } else if !serde_json::to_value(&resp).unwrap().is_null() {
