@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use types::{errors::Result, extensions::ExtensionManifest};
@@ -21,7 +21,7 @@ pub(crate) fn validate_manifest(manifest_path: &Path) -> Result<()> {
                 return Err("Extension path defined in manifest does not exist".into());
             }
         }
-        Err(e) => return Err(format!("Failed to validate manifest: {}", e.to_string()).into()),
+        Err(e) => return Err(format!("Failed to validate manifest: {}", e).into()),
     }
 
     Ok(())

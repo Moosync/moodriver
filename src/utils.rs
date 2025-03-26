@@ -33,6 +33,7 @@ fn path_to_pointer(path: &[PathSegment]) -> String {
 ///   - The corresponding field in `resp` is set to the string "ignore".
 ///   - If the "ignore" is found as the value of a key in an object (i.e. not at the root),
 ///     that key is removed from the expected object.
+///
 /// If the entire expected value is `"ignore"`, then the whole `resp` is set to `"ignore"`.
 pub(crate) fn sanitize_resp_by_expected(resp: &mut Value, expected: &mut Value) {
     // Use a stack to store paths (from the root) into the JSON trees.
