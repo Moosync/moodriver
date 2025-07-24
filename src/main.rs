@@ -275,6 +275,7 @@ fn listen_ui_requests(
 
                     ui_reply_tx
                         .send(GenericExtensionHostRequest {
+                            package_name: "".into(),
                             channel: request.channel,
                             data: Some(response),
                         })

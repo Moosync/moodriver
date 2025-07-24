@@ -1,7 +1,4 @@
-use std::{
-    fs::File,
-    path::Path,
-};
+use std::{fs::File, path::Path};
 
 use types::{errors::Result, extensions::ExtensionManifest};
 
@@ -17,8 +14,13 @@ pub(crate) fn validate_manifest(manifest_path: &Path) -> Result<()> {
                 return Err("Manifest is not of a moosync extension".into());
             }
 
-            if !manifest.extension_entry.exists() {
-                return Err("Extension path defined in manifest does not exist".into());
+            let ext_entry = if let Some(parent) = manifest_path.parent() {
+                parent.join(manifest.extension_entry)
+            } else {
+                manifest.extension_entry
+            };
+            if !ext_entry.exists() {
+                return Err(format!("Extension path: {:?} does not exist", ext_entry).into());
             }
         }
         Err(e) => return Err(format!("Failed to validate manifest: {}", e).into()),
