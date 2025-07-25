@@ -20,6 +20,7 @@ use tracing::{create_log_buffer, create_verbose_log, flush_logs};
 use types::{
     errors::{MoosyncError, Result},
     extensions::{ExtensionCommand, GenericExtensionHostRequest, MainCommand, MainCommandResponse},
+    preferences::PreferenceUIData,
     songs::Song,
     ui::{
         extensions::{ExtensionExtraEvent, ExtensionExtraEventArgs, PreferenceData},
@@ -90,6 +91,8 @@ pub(crate) enum MainCommandParsable {
     OpenExternalUrl(bool),
     UpdateAccounts(bool),
     ExtensionsUpdated(bool),
+    RegisterUserPreference(bool),
+    UnregisterUserPreference(bool),
 }
 
 #[derive(Debug, Deserialize)]
@@ -228,7 +231,7 @@ define_command_mappings!(
     with_params: [
         GetSong, GetEntity, SetPreference, SetSecure,
         AddSongs, RemoveSong, UpdateSong, AddPlaylist, AddToPlaylist, RegisterOAuth,
-        OpenExternalUrl, UpdateAccounts
+        OpenExternalUrl, UpdateAccounts, RegisterUserPreference, UnregisterUserPreference
     ],
 
     no_params: [
