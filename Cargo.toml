@@ -4,8 +4,9 @@ version = "1.1.1"
 edition = "2024"
 
 [dependencies]
-extensions = { git = "https://github.com/Moosync/Moosync" }
-types = { git = "https://github.com/Moosync/Moosync", default-features = false, features = ["extensions-core"] }
+extensions = { path = "/home/ovenoboyo/projects/moosync/tauri/Moosync/core/extensions" }
+types = { git = "https://github.com/Moosync/Moosync", default-features = false, branch = "bazel" }
+wasi-common = "40.0.0"
 tokio = { version = "1.43.0", features = ["full"] }
 clap = { version = "4.5.4", features = ["derive"] }
 tracing = "0.1.41"

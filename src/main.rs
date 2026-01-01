@@ -5,22 +5,22 @@ use std::{
     path::{Path, PathBuf},
     process::ExitCode,
     str::FromStr,
+    sync::Arc,
     thread,
     time::Duration,
 };
 
 use clap::{ArgAction, Parser, arg, command};
 use colored::*;
-use extensions::{ExtensionHandler, UiReplySender, UiRequestReceiver};
+use extensions::{ExtensionHandler, models::ExtensionCommand};
 use json_comments::StripComments;
 use manifest::validate_manifest;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::{create_log_buffer, create_verbose_log, flush_logs};
 use types::{
     errors::{MoosyncError, Result},
-    extensions::{ExtensionCommand, GenericExtensionHostRequest, MainCommand, MainCommandResponse},
-    preferences::PreferenceUIData,
+    extensions::{MainCommand, MainCommandResponse},
     songs::Song,
     ui::{
         extensions::{ExtensionExtraEvent, ExtensionExtraEventArgs, PreferenceData},
@@ -35,6 +35,9 @@ mod manifest;
 mod tracing;
 mod ui;
 mod utils;
+
+type ReplyHandler =
+    Arc<Box<dyn Fn(&str, MainCommand) -> Result<MainCommandResponse> + Sync + Send>>;
 
 #[derive(Parser, Debug, Clone)]
 #[command(author, version, about, long_about = None)]
@@ -54,7 +57,7 @@ struct Cli {
     verbose: u8,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(untagged)]
 pub(crate) enum ValidCommand {
     ExtensionExtraEvent(ExtensionExtraEvent),
@@ -66,9 +69,11 @@ pub(crate) struct CommandWrapper {
     #[serde(flatten)]
     command: ValidCommand,
     expected: Option<Value>,
+    #[serde(default)]
+    interactive: bool,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "data")]
 pub(crate) enum MainCommandParsable {
     GetSong(Vec<Song>),
@@ -93,6 +98,7 @@ pub(crate) enum MainCommandParsable {
     ExtensionsUpdated(bool),
     RegisterUserPreference(bool),
     UnregisterUserPreference(bool),
+    GetAppVersion(String),
 }
 
 #[derive(Debug, Deserialize)]
@@ -101,20 +107,19 @@ struct TestCase {
     requests: Vec<MainCommandParsable>,
 }
 
-fn setup_ext_handler(
-    ext_dir: PathBuf,
-) -> Result<(ExtensionHandler, UiRequestReceiver, UiReplySender)> {
-    let (handler, ui_req_rx, ui_reply_tx) = ExtensionHandler::new(
+fn setup_ext_handler(ext_dir: PathBuf, reply_handler: ReplyHandler) -> Result<ExtensionHandler> {
+    let handler = ExtensionHandler::new(
         ext_dir,
         PathBuf::from_str("/tmp/ext-tmp").unwrap(),
         PathBuf::from_str("/tmp/ext-tmp-cache").unwrap(),
+        reply_handler,
     );
 
-    Ok((handler, ui_req_rx, ui_reply_tx))
+    Ok(handler)
 }
 
 fn parse_test_case(test_file: &Path) -> Result<TestCase> {
-    let file = File::open(test_file)?;
+    let file = File::open(test_file).unwrap();
     let reader = BufReader::new(file);
     let stripped = StripComments::new(reader);
 
@@ -136,6 +141,7 @@ fn parse_test_case(test_file: &Path) -> Result<TestCase> {
 }
 
 fn find_matching_preference<'a>(
+    package_name: &str,
     pref_data: &PreferenceData,
     requests: &'a [MainCommandParsable],
     variant_name: &str,
@@ -156,10 +162,10 @@ fn find_matching_preference<'a>(
         .into_iter()
         .find(|r| match (r, variant_name) {
             (MainCommandParsable::GetPreference(request_data), "GetPreference") => {
-                request_data.key == pref_data.key
+                format!("extensions.{}.{}", package_name, request_data.key) == pref_data.key
             }
             (MainCommandParsable::GetSecure(request_data), "GetSecure") => {
-                request_data.key == pref_data.key
+                format!("extensions.{}.{}", package_name, request_data.key) == pref_data.key
             }
             _ => false,
         })
@@ -171,11 +177,11 @@ macro_rules! define_command_mappings {
         no_params: [$($no_params:ident),* $(,)?],
         preference_commands: [$($pref_command:ident),* $(,)?]
     ) => {
-        fn find_matching_request<'a>(command: &MainCommand, requests: &'a [MainCommandParsable]) -> Option<&'a MainCommandParsable> {
+        fn find_matching_request<'a>(package_name: &str, command: &MainCommand, requests: &'a [MainCommandParsable]) -> Option<&'a MainCommandParsable> {
             match command {
                 $(
                     MainCommand::$pref_command(pref_data) => {
-                        find_matching_preference(pref_data, requests, stringify!($pref_command))
+                        find_matching_preference(package_name, pref_data, requests, stringify!($pref_command))
                     },
                 )*
 
@@ -217,8 +223,8 @@ macro_rules! define_command_mappings {
             }
         }
 
-        fn create_response(command: &MainCommand, requests: &[MainCommandParsable]) -> MainCommandResponse {
-            if let Some(request) = find_matching_request(command, requests) {
+        fn create_response(package_name: &str, command: &MainCommand, requests: &[MainCommandParsable]) -> MainCommandResponse {
+            if let Some(request) = find_matching_request(package_name, command, requests) {
                 create_response_from_request(request)
             } else {
                 create_default_response(command)
@@ -235,7 +241,7 @@ define_command_mappings!(
     ],
 
     no_params: [
-        GetCurrentSong, GetPlayerState, GetVolume, GetTime, GetQueue, ExtensionsUpdated
+        GetCurrentSong, GetPlayerState, GetVolume, GetTime, GetQueue, ExtensionsUpdated, GetAppVersion
     ],
 
     preference_commands: [
@@ -243,53 +249,83 @@ define_command_mappings!(
     ]
 );
 
-fn listen_ui_requests(
-    mut ui_requests_rx: UiRequestReceiver,
-    ui_reply_tx: UiReplySender,
+async fn handle_ui_requests(
+    package_name: &str,
+    command: MainCommand,
     requests: Vec<MainCommandParsable>,
-) {
-    tokio::spawn(async move {
+) -> Result<MainCommandResponse> {
+    let request_description = match &command {
+        MainCommand::GetPreference(pref) => {
+            format!(
+                "GetPreference with key 'extensions.{}.{}'",
+                package_name, pref.key
+            )
+        }
+        MainCommand::GetSecure(pref) => {
+            format!(
+                "GetSecure with key 'extensions.{}.{}'",
+                package_name, pref.key
+            )
+        }
+        other => format!("{:?}", other),
+    };
+
+    let response = create_response(package_name, &command, &requests);
+
+    let response_value = match &response {
+        MainCommandResponse::GetPreference(data) => {
+            format!(
+                "data for key 'extensions.{}.{}': '{:?}'",
+                package_name, data.key, data.value
+            )
+        }
+        MainCommandResponse::GetSecure(data) => {
+            format!(
+                "data for key 'extensions.{}.{}': '{:?}'",
+                package_name, data.key, data.value
+            )
+        }
+        other => format!("{:?}", other),
+    };
+
+    ui::log_ui_request(&request_description, &response_value).await;
+
+    Ok(response)
+}
+
+fn handle_interactive_command(command: &mut CommandWrapper) {
+    if command.interactive {
         loop {
-            if let Some(request) = ui_requests_rx.recv().await {
-                if let Some(command) = request.data {
-                    let request_description = match &command {
-                        MainCommand::GetPreference(pref) => {
-                            format!("GetPreference with key '{}'", pref.key)
-                        }
-                        MainCommand::GetSecure(pref) => {
-                            format!("GetSecure with key '{}'", pref.key)
-                        }
-                        other => format!("{:?}", other),
-                    };
+            let mut value = serde_json::to_value(command.command.clone()).unwrap();
 
-                    let response = create_response(&command, &requests);
+            println!("Enter data > ");
+            let mut buffer = String::new();
+            let stdin = std::io::stdin();
+            stdin.read_line(&mut buffer).unwrap();
 
-                    let response_value = match &response {
-                        MainCommandResponse::GetPreference(data) => {
-                            format!("data for key '{}': '{:?}'", data.key, data.value)
+            let res = serde_json::from_str::<Value>(&buffer);
+            match res {
+                Ok(data) => {
+                    value.as_object_mut().unwrap().insert("data".into(), data);
+                    match serde_json::from_value(value) {
+                        Ok(val) => {
+                            *command = val;
+                            return;
                         }
-                        MainCommandResponse::GetSecure(data) => {
-                            format!("data for key '{}': '{:?}'", data.key, data.value)
+                        Err(e) => {
+                            println!("Could not parse data: {}, {}, try again...", buffer, e);
                         }
-                        other => format!("{:?}", other),
-                    };
-
-                    ui::log_ui_request(&request_description, &response_value).await;
-
-                    ui_reply_tx
-                        .send(GenericExtensionHostRequest {
-                            package_name: "".into(),
-                            channel: request.channel,
-                            data: Some(response),
-                        })
-                        .unwrap();
+                    }
+                }
+                Err(e) => {
+                    println!("Could not parse data: {}, try again...", e);
                 }
             }
         }
-    });
+    }
 }
 
-async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
+async fn run_test(file: &Path, wasm: &Path, verbose: u8) -> Result<()> {
     let test_case = parse_test_case(file)?;
     println!(
         "{} {} commands and {} requests\n",
@@ -298,16 +334,23 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
         test_case.requests.len()
     );
 
-    let (handler, ui_requests_rx, ui_reply_tx) =
-        setup_ext_handler(wasm.parent().unwrap().to_path_buf())?;
-
-    listen_ui_requests(ui_requests_rx, ui_reply_tx, test_case.requests);
+    let runtime = tokio::runtime::Handle::try_current().unwrap();
+    let handler = setup_ext_handler(
+        wasm.parent().unwrap().to_path_buf(),
+        Arc::new(Box::new(move |package_name, command| {
+            runtime.block_on(handle_ui_requests(
+                package_name,
+                command,
+                test_case.requests.clone(),
+            ))
+        })),
+    )?;
 
     handler.find_new_extensions().await?;
 
     let mut is_waiting: bool = true;
 
-    ui::initialize_progress_bar().await;
+    ui::initialize_progress_bar(verbose).await;
 
     let mut notified: HashMap<String, bool> = HashMap::new();
     while is_waiting {
@@ -357,7 +400,9 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
     );
 
     let total_commands = test_case.commands.len();
-    for (i, command) in test_case.commands.into_iter().enumerate() {
+    for (i, mut command) in test_case.commands.into_iter().enumerate() {
+        handle_interactive_command(&mut command);
+
         let command_desc = match &command.command {
             ValidCommand::ExtensionExtraEvent(event) => {
                 format!("ExtensionExtraEvent[type: {:?}]", event)
@@ -375,24 +420,22 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
         let resp = match command.command {
             ValidCommand::ExtensionExtraEvent(command) => {
                 handler
-                    .send_extension_command(
-                        ExtensionCommand::ExtraExtensionEvent(ExtensionExtraEventArgs {
+                    .send_extension_command(ExtensionCommand::ExtraExtensionEvent(Box::new(
+                        ExtensionExtraEventArgs {
                             data: command.clone(),
                             package_name: package_name.clone(),
-                        }),
-                        true,
-                    )
+                        },
+                    )))
                     .await?
             }
             ValidCommand::ExtensionCommand(command) => {
-                handler
-                    .send_extension_command(command.clone(), true)
-                    .await?
+                handler.send_extension_command(command.clone()).await?
             }
         };
 
         if let Some(mut expected) = command.expected {
             let mut resp_value = serde_json::to_value(resp)?;
+            let original_resp = resp_value.clone();
             sanitize_resp_by_expected(&mut resp_value, &mut expected);
 
             remove_nulls(&mut expected);
@@ -400,12 +443,14 @@ async fn run_test(file: &Path, wasm: &Path) -> Result<()> {
 
             // if !is_ignore(&expected) {
             if resp_value != expected {
-                let expected_str = serde_json::to_string_pretty(&expected).unwrap();
                 let received_str = serde_json::to_string_pretty(&resp_value).unwrap();
+                let expected_str = serde_json::to_string_pretty(&expected).unwrap();
 
                 return Err(
                     format!("Expected response does not match received response:\n{}\n\n{}", pretty_print_diff(&expected_str, &received_str), "Legend: \n\"+\" - Present in expected but not in received\n\"-\" - Present in received but not in expected".cyan()).into(),
                 );
+            } else {
+                println!("Received response {:?}", original_resp);
             }
         } else if !serde_json::to_value(&resp).unwrap().is_null() {
             return Err(format!(
@@ -441,7 +486,7 @@ async fn run_cli(mut args: Cli) -> Result<()> {
     validate_manifest(&args.manifest_path)?;
 
     if let Some(trace) = args.trace {
-        run_test(&trace, &args.manifest_path).await?;
+        run_test(&trace, &args.manifest_path, args.verbose).await?;
     } else if let Some(dir) = args.dir {
         assert!(dir.exists(), "Traces directory {:?} does not exist", dir);
 
@@ -449,7 +494,7 @@ async fn run_cli(mut args: Cli) -> Result<()> {
             if entry.file_type().is_file() {
                 if let Some(ext) = entry.path().extension() {
                     if ext == "json" || ext == "jsonc" || ext == "yaml" || ext == "yml" {
-                        run_test(entry.path(), &args.manifest_path).await?;
+                        run_test(entry.path(), &args.manifest_path, args.verbose).await?;
                     }
                 }
             }

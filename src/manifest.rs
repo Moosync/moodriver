@@ -7,7 +7,8 @@ pub(crate) fn validate_manifest(manifest_path: &Path) -> Result<()> {
         return Err(format!("Manifest does not exist at path: {:?}", manifest_path).into());
     }
 
-    let manifest = serde_json::from_reader::<_, ExtensionManifest>(File::open(manifest_path)?);
+    let manifest =
+        serde_json::from_reader::<_, ExtensionManifest>(File::open(manifest_path).unwrap());
     match manifest {
         Ok(manifest) => {
             if !manifest.moosync_extension {
